@@ -253,16 +253,17 @@ function fmtDelta(d) {
 function renderTable() {
   document.getElementById('clientTableWrap').innerHTML = `
     <table>
-      <thead><tr><th>Client</th><th>Niche</th><th>Score</th><th>Delta</th><th>90-Day</th><th>Status</th></tr></thead>
+      <thead><tr><th>Client</th><th style="text-align:center">Niche</th><th>Score</th><th>Delta</th><th>90-Day</th><th>Status</th></tr></thead>
       <tbody>
         ${allClients.map(c => {
           const score = c.signal_score || 0;
           const delta = getDelta(c.id);
           const runs = allRuns.filter(r => r.client_id === c.id);
           const progress = Math.min(100, (runs.length / 6) * 100);
+          const hasNiche = !!(c.niche && c.niche.trim());
           return `<tr onclick="openClient('${c.id}')">
             <td class="name"><span class="status-dot ${statusClass(score)}"></span>${c.name}</td>
-            <td class="niche" title="${c.niche||''}">${c.niche || '<em style="color:var(--muted)">—</em>'}</td>
+            <td style="text-align:center">${hasNiche ? '<span style="color:var(--green);font-weight:700;font-size:13px">✓</span>' : '<span style="color:var(--muted)">—</span>'}</td>
             <td><span class="score-badge ${scoreBadgeClass(score)}">${score}</span></td>
             <td>${fmtDelta(delta)}</td>
             <td><div class="bar-container"><div class="bar-track"><div class="bar-fill" style="width:${progress}%"></div></div><div class="bar-label">${runs.length} runs</div></div></td>
