@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pressure Tested — Coach Dashboard</title>
+<title>Pressure Tested â€” Coach Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -412,7 +412,7 @@
 <main>
   <div class="page-title fade-in">
     <h1>Coach <span>Dashboard</span></h1>
-    <div class="last-updated" id="last-updated">—</div>
+    <div class="last-updated" id="last-updated">â€”</div>
   </div>
 
   <div id="error-banner" class="error-banner"></div>
@@ -421,27 +421,27 @@
   <div class="kpi-row">
     <div class="kpi fade-in">
       <div class="kpi-label">Active Clients</div>
-      <div class="kpi-value gold" id="kpi-clients">—</div>
+      <div class="kpi-value gold" id="kpi-clients">â€”</div>
       <div class="kpi-sub">in pipeline</div>
     </div>
     <div class="kpi fade-in">
       <div class="kpi-label">Diagnostics Run</div>
-      <div class="kpi-value" id="kpi-runs">—</div>
+      <div class="kpi-value" id="kpi-runs">â€”</div>
       <div class="kpi-sub">total sessions</div>
     </div>
     <div class="kpi fade-in">
       <div class="kpi-label">Avg Signal Score</div>
-      <div class="kpi-value gold" id="kpi-avg-score">—</div>
+      <div class="kpi-value gold" id="kpi-avg-score">â€”</div>
       <div class="kpi-sub">across clients</div>
     </div>
     <div class="kpi fade-in">
       <div class="kpi-label">Avg CTR</div>
-      <div class="kpi-value" id="kpi-avg-ctr">—</div>
+      <div class="kpi-value" id="kpi-avg-ctr">â€”</div>
       <div class="kpi-sub">client average</div>
     </div>
     <div class="kpi fade-in">
       <div class="kpi-label">Top Constraint</div>
-      <div class="kpi-value gold" style="font-size:1rem;padding-top:0.4rem" id="kpi-constraint">—</div>
+      <div class="kpi-value gold" style="font-size:1rem;padding-top:0.4rem" id="kpi-constraint">â€”</div>
       <div class="kpi-sub">most common</div>
     </div>
   </div>
@@ -510,7 +510,7 @@ function scoreClass(s) {
 }
 
 function timeAgo(ts) {
-  if (!ts) return '—';
+  if (!ts) return 'â€”';
   const diff = Date.now() - new Date(ts).getTime();
   const m = Math.floor(diff / 60000);
   if (m < 60) return `${m}m ago`;
@@ -534,7 +534,7 @@ async function loadDashboard() {
 
     const clientList = document.getElementById('client-list');
     if (!clients.length) {
-      clientList.innerHTML = `<div class="empty"><div class="empty-icon">◎</div>No clients yet.<br>Run the diagnostic tool to add your first client.</div>`;
+      clientList.innerHTML = `<div class="empty"><div class="empty-icon">â—Ž</div>No clients yet.<br>Run the diagnostic tool to add your first client.</div>`;
     } else {
       clientList.innerHTML = `
         <table class="client-table">
@@ -566,7 +566,7 @@ async function loadDashboard() {
 
     const runList = document.getElementById('run-list');
     if (!runs.length) {
-      runList.innerHTML = `<div class="empty"><div class="empty-icon">◎</div>No diagnostic runs yet.<br>Wire the diagnostic tool to start capturing data.</div>`;
+      runList.innerHTML = `<div class="empty"><div class="empty-icon">â—Ž</div>No diagnostic runs yet.<br>Wire the diagnostic tool to start capturing data.</div>`;
     } else {
       const avgScore = Math.round(runs.reduce((a,r) => a + (r.signal_score||0), 0) / runs.length);
       const avgCtr = (runs.reduce((a,r) => a + (r.avg_ctr||0), 0) / runs.length).toFixed(2);
@@ -578,16 +578,32 @@ async function loadDashboard() {
       const freq = {};
       constraints.forEach(c => freq[c] = (freq[c]||0) + 1);
       const top = Object.entries(freq).sort((a,b) => b[1]-a[1])[0];
-      document.getElementById('kpi-constraint').textContent = top ? top[0] : '—';
+      document.getElementById('kpi-constraint').textContent = top ? top[0] : 'â€”';
 
+      const deltaMap = {};
+      runs.forEach((r, i) => {
+        if (!r.client_id) return;
+        const prev = runs.slice(i+1).find(p => p.client_id === r.client_id);
+        if (prev && r.signal_score && prev.signal_score) deltaMap[r.id] = r.signal_score - prev.signal_score;
+      });
+      function deltaHtml(id) {
+        const d = deltaMap[id];
+        if (d === undefined) return """";
+        if (d > 0) return ""<span style=""""color:#2ecc71;font-size:0.8rem;font-weight:700"""">+"" + d + ""</span>"";
+        if (d < 0) return ""<span style=""""color:#e74c3c;font-size:0.8rem;font-weight:700"""">"" + d + ""</span>"";
+        return ""<span style=""""color:#6b8299;font-size:0.8rem"""">0</span>"";
+      }
       runList.innerHTML = runs.slice(0,6).map(r => `
         <div class="run-item">
           <div>
             <div class="run-name">${r.clients?.name || 'Anonymous'}</div>
             <div class="run-meta">${r.videos_analyzed || '—'} videos · ${timeAgo(r.run_at)}</div>
           </div>
-          <div>
-            <div class="run-score ${scoreClass(r.signal_score)}">${r.signal_score || '—'}<span style="font-size:0.7rem;font-weight:400">/100</span></div>
+          <div style="text-align:right">
+            <div style="display:flex;align-items:center;gap:0.4rem;justify-content:flex-end">
+              <div class="run-score ${scoreClass(r.signal_score)}">${r.signal_score || '—'}<span style="font-size:0.7rem;font-weight:400">/100</span></div>
+              ${deltaHtml(r.id)}
+            </div>
             <div class="run-constraint">${r.primary_constraint || '—'}</div>
           </div>
         </div>`).join('');
@@ -596,14 +612,14 @@ async function loadDashboard() {
     // Build repair queue from latest run
     const repairList = document.getElementById('repair-list');
     if (!runs.length) {
-      repairList.innerHTML = `<div class="empty"><div class="empty-icon">◎</div>No repair queue yet.</div>`;
+      repairList.innerHTML = `<div class="empty"><div class="empty-icon">â—Ž</div>No repair queue yet.</div>`;
       document.getElementById('repair-count').textContent = '0 items';
     } else {
       const latest = runs[0];
       const queue = [];
-      if (latest.ctr_signal < 15) queue.push({ layer: 'CTR / Packaging', text: `CTR Signal ${latest.ctr_signal}/30 — rewrite title and thumbnail on lowest-CTR video.` });
-      if (latest.vpi < 15) queue.push({ layer: 'Views Per Impression', text: `VPI ${latest.vpi}/25 — hook and title alignment needs repair.` });
-      if (latest.impression_depth < 20) queue.push({ layer: 'Impression Depth', text: `Impression Depth ${latest.impression_depth}/25 — upload more to build depth.` });
+      if (latest.ctr_signal < 15) queue.push({ layer: 'CTR / Packaging', text: `CTR Signal ${latest.ctr_signal}/30 â€” rewrite title and thumbnail on lowest-CTR video.` });
+      if (latest.vpi < 15) queue.push({ layer: 'Views Per Impression', text: `VPI ${latest.vpi}/25 â€” hook and title alignment needs repair.` });
+      if (latest.impression_depth < 20) queue.push({ layer: 'Impression Depth', text: `Impression Depth ${latest.impression_depth}/25 â€” upload more to build depth.` });
       if (!queue.length) queue.push({ layer: 'Channel Health', text: 'All signal layers performing well. Maintain upload velocity.' });
 
       document.getElementById('repair-count').textContent = `${queue.length} items`;
