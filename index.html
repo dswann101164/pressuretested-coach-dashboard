@@ -327,14 +327,19 @@ function openClient(clientId) {
     if (typeof queue === 'string') { try { queue = JSON.parse(queue); } catch(e) { queue = [{issue: queue, priority: 'HIGH'}]; } }
     if (Array.isArray(queue) && queue.length) repairHtml = queue.map(item => `<div class="repair-item"><span class="repair-priority">${item.priority||'HIGH'}</span><span>${item.issue||item}</span></div>`).join('');
   }
+  const weeksIn = client.start_date ? Math.floor((new Date() - new Date(client.start_date)) / (1000*60*60*24*7)) : null;
   document.getElementById('modalBody').innerHTML = `
     <div class="client-info-grid">
       <div class="info-block"><div class="info-label">Email</div><div class="info-value">${client.email || '<span class="empty">Not set</span>'}</div></div>
       <div class="info-block"><div class="info-label">Phone</div><div class="info-value">${client.phone || '<span class="empty">Not set</span>'}</div></div>
+      <div class="info-block"><div class="info-label">Location</div><div class="info-value">${client.location ? `${client.location} <span style="color:var(--muted);font-size:11px">(${client.timezone || ''})</span>` : '<span class="empty">Not set</span>'}</div></div>
+      <div class="info-block"><div class="info-label">Program</div><div class="info-value">${client.program || '<span class="empty">Not set</span>'}</div></div>
       <div class="info-block"><div class="info-label">Signal Score</div><div class="info-value"><span class="score-badge ${scoreBadgeClass(score)}" style="font-size:15px">${score}/100</span></div></div>
+      <div class="info-block"><div class="info-label">Weeks In Program</div><div class="info-value">${weeksIn !== null ? weeksIn + ' weeks' : '<span class="empty">No start date</span>'}</div></div>
       <div class="info-block"><div class="info-label">Declared Niche</div><div class="info-value">${niche || '<span class="empty">Not declared</span>'}</div></div>
+      <div class="info-block"><div class="info-label">Niche Alignment</div><div class="info-value">${alignmentHtml}</div></div>
       <div class="info-block wide"><div class="info-label">YouTube Channel</div><div class="info-value">${channelUrl ? `<a href="${channelUrl}" target="_blank" rel="noopener">${channelUrl}</a>` : '<span class="empty">Not set</span>'}</div></div>
-      <div class="info-block wide"><div class="info-label">Niche Alignment</div><div class="info-value">${alignmentHtml}</div></div>
+      <div class="info-block wide"><div class="info-label">Coach Notes</div><div class="info-value">${client.notes || '<span class="empty">No notes</span>'}</div></div>
     </div>
     <div class="section-title">Run History</div>${runHistoryHtml}
     <div class="section-title" style="margin-top:20px">Repair Queue — Latest Run</div>${repairHtml}`;
