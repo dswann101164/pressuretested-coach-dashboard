@@ -129,6 +129,7 @@
         <span class="panel-title">All Clients</span>
         <button class="btn-gold" onclick="openIntake()">+ Add Client</button>
         <button class="btn-outline" onclick="openCoachIntake()" style="margin-left:8px;background:transparent;border:1px solid rgba(201,168,76,0.5);color:var(--gold);padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(201,168,76,0.5)'">+ Add Coach</button>
+        <button onclick="promptDeleteClient()" style="margin-left:8px;background:transparent;border:1px solid rgba(224,82,82,0.4);color:rgba(224,82,82,0.8);padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;" onmouseover="this.style.borderColor='rgba(224,82,82,1)';this.style.color='rgba(224,82,82,1)'" onmouseout="this.style.borderColor='rgba(224,82,82,0.4)';this.style.color='rgba(224,82,82,0.8)'">Delete Client</button>
       </div>
       <div id="clientTableWrap"><div class="loading">Loading clients…</div></div>
     </div>
@@ -410,9 +411,18 @@ function showToast(msg) {
 }
 
 document.getElementById('clientOverlay').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
-document.getElementById('coachOverlay').addEventListener('click', function(e) { if (e.target === this) closeCoachIntake(); });
+const _co = document.getElementById('coachOverlay'); if (_co) _co.addEventListener('click', function(e) { if (e.target === this) closeCoachIntake(); });
 
 function openCoachIntake() { document.getElementById('coachOverlay').classList.add('open'); }
+function promptDeleteClient() {
+  const names = allClients.map((c,i) => (i+1) + '. ' + c.name).join('\n');
+  const input = prompt('Enter client number to delete:\n\n' + names);
+  if (!input) return;
+  const idx = parseInt(input) - 1;
+  if (isNaN(idx) || idx < 0 || idx >= allClients.length) { alert('Invalid selection.'); return; }
+  const client = allClients[idx];
+  deleteClient(client.id, client.name);
+}
 function closeCoachIntake() {
   document.getElementById('coachOverlay').classList.remove('open');
   document.getElementById('coachName').value = '';
