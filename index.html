@@ -268,6 +268,7 @@ function renderTable() {
             <td>${fmtDelta(delta)}</td>
             <td><div class="bar-container"><div class="bar-track"><div class="bar-fill" style="width:${progress}%"></div></div><div class="bar-label">${runs.length} runs</div></div></td>
             <td style="font-size:11px;color:var(--muted)">${score >= 65 ? 'On Track' : score >= 40 ? 'Watch' : 'Critical'}</td>
+            <td style="text-align:center"><button onclick="event.stopPropagation();deleteClient('${c.id}','${c.name}')" title="Delete client" style="background:transparent;border:none;color:rgba(224,82,82,0.5);font-size:15px;cursor:pointer;padding:2px 6px;border-radius:4px;" onmouseover="this.style.color='rgba(224,82,82,1)'" onmouseout="this.style.color='rgba(224,82,82,0.5)'">&#x1F5D1;</button></td>
           </tr>`;
         }).join('')}
       </tbody>
@@ -342,11 +343,8 @@ function openClient(clientId) {
       <div class="info-block wide">
         <div class="info-label">Coach Notes</div>
         <textarea id="clientNotes" style="width:100%;background:var(--navy-light);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:9px 12px;color:var(--white);font-size:13px;font-family:var(--font);outline:none;resize:vertical;min-height:80px;line-height:1.5" placeholder="Add coaching notes...">${client.notes || ''}</textarea>
-        <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
-          <button onclick="saveNotes('${client.id}')" style="background:var(--gold);color:var(--navy);border:none;padding:6px 14px;border-radius:5px;font-size:12px;font-weight:700;cursor:pointer">Save Notes</button>
-          <span id="notesSaved" style="font-size:11px;color:var(--green);display:none">✓ Saved</span>
-          <button onclick="deleteClient('${client.id}','${client.name}')" style="background:transparent;color:rgba(224,82,82,0.7);border:1px solid rgba(224,82,82,0.3);padding:6px 14px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer">Delete Client</button>
-        </div>
+        <button onclick="saveNotes('${client.id}')" style="margin-top:8px;background:var(--gold);color:var(--navy);border:none;padding:6px 14px;border-radius:5px;font-size:12px;font-weight:700;cursor:pointer">Save Notes</button>
+        <span id="notesSaved" style="margin-left:10px;font-size:11px;color:var(--green);display:none">✓ Saved</span>
       </div>
     </div>
     <div class="section-title">Run History</div>${runHistoryHtml}
