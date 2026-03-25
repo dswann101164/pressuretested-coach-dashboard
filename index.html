@@ -128,6 +128,7 @@
       <div class="panel-header">
         <span class="panel-title">All Clients</span>
         <button class="btn-gold" onclick="openIntake()">+ Add Client</button>
+        <button class="btn-outline" onclick="openCoachIntake()" style="margin-left:8px;background:transparent;border:1px solid rgba(201,168,76,0.5);color:var(--gold);padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(201,168,76,0.5)'">+ Add Coach</button>
       </div>
       <div id="clientTableWrap"><div class="loading">Loading clients…</div></div>
     </div>
@@ -409,8 +410,45 @@ function showToast(msg) {
 }
 
 document.getElementById('clientOverlay').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+document.getElementById('coachOverlay').addEventListener('click', function(e) { if (e.target === this) closeCoachIntake(); });
+
+function openCoachIntake() { document.getElementById('coachOverlay').classList.add('open'); }
+function closeCoachIntake() {
+  document.getElementById('coachOverlay').classList.remove('open');
+  document.getElementById('coachName').value = '';
+  document.getElementById('coachEmail').value = '';
+}
+async function submitCoachIntake() {
+  const name = document.getElementById('coachName').value.trim();
+  const email = document.getElementById('coachEmail').value.trim();
+  if (!name || !email) { alert('Name and email are required.'); return; }
+  try {
+    await sbFetch('coaches', { method: 'POST', body: JSON.stringify({ name, email }) });
+    closeCoachIntake();
+    showToast('Coach added — ' + name);
+  } catch(e) { alert('Error: ' + e.message); }
+}
 document.getElementById('intakeOverlay').addEventListener('click', function(e) { if (e.target === this) closeIntake(); });
 loadDashboard();
 </script>
+<div class="overlay" id="coachOverlay">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-header">
+      <h2 class="modal-title">Add Coach</h2>
+      <button class="modal-close" onclick="closeCoachIntake()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:12px;">
+        <label class="form-label">Name *</label>
+        <input class="form-input" id="coachName" placeholder="Coach name" type="text">
+      </div>
+      <div class="form-group" style="margin-bottom:12px;">
+        <label class="form-label">Email *</label>
+        <input class="form-input" id="coachEmail" placeholder="coach@email.com" type="email">
+      </div>
+      <button class="btn-gold" onclick="submitCoachIntake()" style="width:100%;margin-top:8px;">Add Coach</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
