@@ -334,7 +334,7 @@ function openClient(clientId) {
       <div class="info-block"><div class="info-label">Phone</div><div class="info-value">${client.phone || '<span class="empty">Not set</span>'}</div></div>
       <div class="info-block"><div class="info-label">Location</div><div class="info-value">${client.location ? `${client.location} <span style="color:var(--muted);font-size:11px">(${client.timezone || ''})</span>` : '<span class="empty">Not set</span>'}</div></div>
       <div class="info-block"><div class="info-label">Program</div><div class="info-value">${client.program || '<span class="empty">Not set</span>'}</div></div>
-      <div class="info-block"><div class="info-label">Signal Score</div><div class="info-value"><span class="score-badge ${scoreBadgeClass(score)}" style="font-size:15px">${score}/100</span></div></div>
+      <div class="info-block"><div class="info-label">Signal Score</div><div class="info-value"><span class="score-badge ${scoreBadgeClass(score)}" style="font-size:15px">${score}/100</span>${(() => { const r = latestRun; if (!r) return ""; const ctr = r.ctr_signal||0, imp = r.impression_depth||0, vp = r.vpi||0, vel = r.velocity||0; const proj = Math.min(100, score + (ctr < 15 ? 15 : 0) + (imp < 13 ? 8 : 0) + (vp < 13 ? 8 : 0) + (vel < 10 ? 5 : 0)); if (proj <= score) return ""; return `<span style="font-size:11px;font-family:var(--mono);color:var(--gold);margin-left:8px;">-> ${proj} projected</span>`; })()}</div></div>
       <div class="info-block"><div class="info-label">Weeks In Program</div><div class="info-value">${weeksIn !== null ? weeksIn + ' weeks' : '<span class="empty">No start date</span>'}</div></div>
       <div class="info-block"><div class="info-label">Declared Niche</div><div class="info-value">${niche || '<span class="empty">Not declared</span>'}</div></div>
       <div class="info-block"><div class="info-label">Niche Alignment</div><div class="info-value">${alignmentHtml}</div></div>
@@ -342,8 +342,11 @@ function openClient(clientId) {
       <div class="info-block wide">
         <div class="info-label">Coach Notes</div>
         <textarea id="clientNotes" style="width:100%;background:var(--navy-light);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:9px 12px;color:var(--white);font-size:13px;font-family:var(--font);outline:none;resize:vertical;min-height:80px;line-height:1.5" placeholder="Add coaching notes...">${client.notes || ''}</textarea>
-        <button onclick="saveNotes('${client.id}')" style="margin-top:8px;background:var(--gold);color:var(--navy);border:none;padding:6px 14px;border-radius:5px;font-size:12px;font-weight:700;cursor:pointer">Save Notes</button>
-        <span id="notesSaved" style="margin-left:10px;font-size:11px;color:var(--green);display:none">✓ Saved</span>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
+          <button onclick="saveNotes('${client.id}')" style="background:var(--gold);color:var(--navy);border:none;padding:6px 14px;border-radius:5px;font-size:12px;font-weight:700;cursor:pointer">Save Notes</button>
+          <span id="notesSaved" style="font-size:11px;color:var(--green);display:none">✓ Saved</span>
+          <button onclick="deleteClient('${client.id}','${client.name}')" style="margin-left:auto;background:transparent;color:rgba(224,82,82,0.7);border:1px solid rgba(224,82,82,0.3);padding:6px 14px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer">Delete Client</button>
+        </div>
       </div>
     </div>
     <div class="section-title">Run History</div>${runHistoryHtml}
@@ -365,6 +368,16 @@ async function saveNotes(clientId) {
   } catch(e) { alert('Save failed: ' + e.message); }
 }
 
+async function deleteClient(clientId, clientName) {
+  if (!confirm('Delete ' + clientName + '? Removes client and all diagnostic runs. Cannot be undone.')) return;
+  try {
+    await sbFetch('diagnostic_runs?client_id=eq.' + clientId, { method: 'DELETE' });
+    await sbFetch('clients?id=eq.' + clientId, { method: 'DELETE' });
+    closeModal();
+    showToast(clientName + ' deleted');
+    await loadDashboard();
+  } catch(e) { alert('Delete failed: ' + e.message); }
+}
 function closeModal() { document.getElementById('clientOverlay').classList.remove('open'); }
 function openIntake() { document.getElementById('intakeOverlay').classList.add('open'); }
 function closeIntake() {
