@@ -253,7 +253,7 @@ function fmtDelta(d) {
 function renderTable() {
   document.getElementById('clientTableWrap').innerHTML = `
     <table>
-      <thead><tr><th>Client</th><th style="text-align:center">Niche</th><th>Score</th><th>Delta</th><th>90-Day</th><th>Status</th></tr></thead>
+      <thead><tr><th>Client</th><th style="text-align:center">Niche</th><th>Score</th><th>Delta</th><th>90-Day</th><th>Status</th><th></th></tr></thead>
       <tbody>
         ${allClients.map(c => {
           const score = c.signal_score || 0;
